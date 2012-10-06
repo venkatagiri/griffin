@@ -4,8 +4,7 @@ class Router {
 	private static $routes = array();
 
 	public function __construct($routes = false) {
-		if(is_array($routes)) self::$routes = $routes;
-		else require_once(GRIFFIN_WEBAPP.'/config/routes.php');
+		if(file_exists($routes)) require_once($routes);
 	}
 
 	public static function connect($route_key, $route_params = array(), $conditions = array()) {
