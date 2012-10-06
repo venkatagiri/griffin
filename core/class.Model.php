@@ -85,17 +85,17 @@ abstract class Model {
 		// return $clean_attrs;
 	}
 
-	public function has_changed() {
-		if(!$this->id) return;
+	// public function has_changed() {
+	// 	if(!$this->id) return;
 		
-		self::$_db_attrs = self::find_by_id($this->id)->clean_attrs();
-		$attrs = $this->clean_attrs();
-		foreach($attrs as $key=>$value) {
-			if(preg_match("/^date/i", $key)) continue; // Don't consider dates while comparing.
-			if(self::$_db_attrs[$key] != $value) return true;
-		}
-		return false;
-	}
+	// 	self::$_db_attrs = self::find_by_id($this->id)->clean_attrs();
+	// 	$attrs = $this->clean_attrs();
+	// 	foreach($attrs as $key=>$value) {
+	// 		if(preg_match("/^date/i", $key)) continue; // Don't consider dates while comparing.
+	// 		if(self::$_db_attrs[$key] != $value) return true;
+	// 	}
+	// 	return false;
+	// }
 		
 	public function save() {
 		return isset($this->id)? $this->update() : $this->create();
