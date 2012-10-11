@@ -23,6 +23,11 @@ abstract class Model {
 		return isset($this->fields[$name]);
 	}
 
+	private static function db() {
+		if(!isset(self::$_db)) self::$_db = Database::get_instance();
+		return self::$_db;
+	}
+
 	public static function table_name() {
 		if(isset(static::$table_name)) return static::$table_name;
 		else return Table::get_table_name(get_called_class());
@@ -45,7 +50,7 @@ abstract class Model {
 	public static function delete_where($where = '1 != 1') {
 		$sql = "DELETE FROM ".self::table_name();
 		$sql .= " WHERE ".$where;
-		self::$_db->execute($sql);
+		self::db()->execute($sql);
 		return true;
 	}
 
@@ -66,13 +71,13 @@ abstract class Model {
 	}
 	
 	public static function find_by_sql($sql) {
-		return self::$_db->query($sql, get_called_class());
+		return self::db()->query($sql, get_called_class());
 	}
 	
 	public static function count($where_clause="1 = 1") {
 		$sql = "SELECT COUNT(1) FROM ".self::table_name();
 		$sql .= " WHERE ".$where_clause;
-		$result_array = self::$_db->query($sql);
+		$result_array = self::db()->query($sql);
 		return array_shift($result_array[0]);
 	}
 
@@ -80,7 +85,7 @@ abstract class Model {
 		return $this->fields;
 		// $clean_attrs = array();
 		// foreach($this->fields as $key => $value) {
-		// 	$clean_attrs[$key] = self::$_db->prepare_value($value); #TODO: Review this.
+		// 	$clean_attrs[$key] = self::db()->prepare_value($value); #TODO: Review this.
 		// }
 		// return $clean_attrs;
 	}
@@ -88,11 +93,11 @@ abstract class Model {
 	// public function has_changed() {
 	// 	if(!$this->id) return;
 		
-	// 	self::$_db_attrs = self::find_by_id($this->id)->clean_attrs();
+	// 	$db_attrs = self::find_by_id($this->id)->clean_attrs();
 	// 	$attrs = $this->clean_attrs();
 	// 	foreach($attrs as $key=>$value) {
 	// 		if(preg_match("/^date/i", $key)) continue; // Don't consider dates while comparing.
-	// 		if(self::$_db_attrs[$key] != $value) return true;
+	// 		if($db_attrs[$key] != $value) return true;
 	// 	}
 	// 	return false;
 	// }
@@ -108,8 +113,8 @@ abstract class Model {
 		$sql .= "`) VALUES ( '";
 		$sql .= join("', '", array_values($attrs));
 		$sql .= "')";
-		if(self::$_db->execute($sql)) {
-			$this->id = self::$_db->insert_id();
+		if(self::db()->execute($sql)) {
+			$this->id = self::db()->insert_id();
 			return true;
 		}
 		return false;
@@ -123,16 +128,16 @@ abstract class Model {
 		}
 		$sql = "UPDATE ".self::table_name()." SET ";
 		$sql .= join(", ", $attr_pairs);
-		$sql .= " WHERE id=".self::$_db->prepare_value($this->id);
-		return (self::$_db->execute($sql) == 1)? true : false ;
+		$sql .= " WHERE id=".self::db()->prepare_value($this->id);
+		return (self::db()->execute($sql) == 1)? true : false ;
 	}
 	
 	public function delete() {
 		$sql = "DELETE FROM ".self::table_name();
-		$sql .= " WHERE id=".self::$_db->prepare_value($this->id);
+		$sql .= " WHERE id=".self::db()->prepare_value($this->id);
 		$sql .= " LIMIT 1";
-		self::$_db->execute($sql);
-		return (self::$_db->affected_rows() == 1)? true : false ;
+		self::db()->execute($sql);
+		return (self::db()->affected_rows() == 1)? true : false ;
 	}	
 }
 
