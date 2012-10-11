@@ -1,8 +1,8 @@
 <?php
 
 class Config {
-	private static $instance;
-	private $config = array();
+	private static $_instance;
+	private $_config = array();
 
 	private function __construct() {
 		require_once(GRIFFIN_ROOT.'/core/config.php');
@@ -12,16 +12,16 @@ class Config {
 		} else {
 			require_once(GRIFFIN_ROOT.'/tests/config.tests.php');
 		}
-		$this->config = $GRIFFIN_CFG;
+		$this->_config = $GRIFFIN_CFG;
 	}
 
 	public static function get_instance() {
-		if(!self::$instance) self::$instance = new Config();
-		return self::$instance;
+		if(!self::$_instance) self::$_instance = new Config();
+		return self::$_instance;
 	}
 
 	public function get($key) {
-		if(isset($this->config[$key])) return $this->config[$key];
+		if(isset($this->_config[$key])) return $this->_config[$key];
 		return null;
 	}
 }

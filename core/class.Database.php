@@ -1,24 +1,24 @@
 <?php
 
 class Database {
-	private $connection;
-	private $last_query;
-	private $config;
-	private static $instance;
+	private $_connection;
+	private $_last_query;
+	private $_config;
+	private static $_instance;
 
 	private function __construct() {
-		$this->config = Config::get_instance();
+		$this->_config = Config::get_instance();
 		try {
-			$db_string = sprintf("mysql:host=%s;dbname=%s", $this->config->get('db_host'), $this->config->get('db_name'));
-			$this->connection = new PDO($db_string,
-				$this->config->get('db_user'),
-				$this->config->get('db_password'),
+			$db_string = sprintf("mysql:host=%s;dbname=%s", $this->_config->get('db_host'), $this->_config->get('db_name'));
+			$this->_connection = new PDO($db_string,
+				$this->_config->get('db_user'),
+				$this->_config->get('db_password'),
 				array(PDO::ATTR_PERSISTENT => true));
-			$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$this->_connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		}
 		catch(PDOException $e) {
 			$error = "Oops! Something went wrong. Our coding monkeys will be summoned to fix this. Please go back and try again!";
-			if($this->config->get('debug_mode')) {
+			if($this->_config->get('debug_mode')) {
 				$error .= '<br />Database connection failed : ' . $e->getMessage();
 			}
 			die($error);
@@ -26,67 +26,67 @@ class Database {
 	}
 
 	function __destruct() {
-		$this->connection = null;
+		$this->_connection = null;
 	}
 
 	public static function get_instance() {
-		if(!self::$instance) self::$instance = new Database();
-		return self::$instance;
+		if(!self::$_instance) self::$_instance = new Database();
+		return self::$_instance;
 	}
 
 	public function execute($sql) {
-		$this->last_query = $sql;
+		$this->_last_query = $sql;
 		try {
-			return $this->connection->exec($sql);
+			return $this->_connection->exec($sql);
 		}
 		catch(PDOException $e) {
 			$error = "Oops! Something went wrong. Our coding monkeys will be summoned to fix this. Please go back and try again!";
-			if($this->config->get('debug_mode')) {
+			if($this->_config->get('debug_mode')) {
 				$error .= '<br />Database query failed : ' . $e->getMessage();
-				$error .= "<br />Last Query was : " . $this->last_query;
+				$error .= "<br />Last Query was : " . $this->_last_query;
 			}
 			die($error);
 		}
 	}
 
 	public function query($sql, $class = "") {
-		$this->last_query = $sql;
+		$this->_last_query = $sql;
 		try {
-			if($class != "") return $this->connection->query($sql, PDO::FETCH_CLASS, $class);
-			else return $this->connection->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+			if($class != "") return $this->_connection->query($sql, PDO::FETCH_CLASS, $class);
+			else return $this->_connection->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 		}
 		catch(PDOException $e) {
 			$error = "Oops! Something went wrong. Our coding monkeys will be summoned to fix this. Please go back and try again!";
-			if($this->config->get('debug_mode')) {
+			if($this->_config->get('debug_mode')) {
 				$error .= '<br />Database query failed : ' . $e->getMessage();
-				$error .= "<br />Last Query was : " . $this->last_query;
+				$error .= "<br />Last Query was : " . $this->_last_query;
 			}
 			die($error);
 		}
 	}
 
 	public function insert_id() {
-		return $this->connection->lastInsertId();
+		return $this->_connection->lastInsertId();
 	}
 
 	public function prepare_value($value) {
-		return get_magic_quotes_gpc() ? $this->connection->quote($value): $this->connection->quote(stripslashes($value));
+		return get_magic_quotes_gpc() ? $this->_connection->quote($value): $this->_connection->quote(stripslashes($value));
 	}
 
 	public function last_query() {
-		return $this->last_query;
+		return $this->_last_query;
 	}
 
 	public function begin_transaction() {
-		$this->connection->beginTransaction();
+		$this->_connection->beginTransaction();
 	}
 
 	public function commit() {
-		$this->connection->commit();
+		$this->_connection->commit();
 	}
 
 	public function rollback() {
-		$this->connection->rollBack();
+		$this->_connection->rollBack();
 	}	
 }
 

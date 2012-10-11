@@ -1,23 +1,23 @@
 <?php
 
 class Router {
-	private static $routes = array();
+	private static $_routes = array();
 
 	public function __construct($routes = false) {
 		if(file_exists($routes)) require_once($routes);
 	}
 
 	public static function connect($route_key, $route_params = array(), $conditions = array()) {
-		self::$routes[$route_key] = $route_params;
+		self::$_routes[$route_key] = $route_params;
 	}
 
 	public static function reset() {
-		self::$routes = array();
+		self::$_routes = array();
 	}
 
 	public function parse($path) {
 		$params = array();
-		foreach(self::$routes as $route_key => $route_params) {
+		foreach(self::$_routes as $route_key => $route_params) {
 			$regex_route = preg_replace('/:(\w+)/', '(\w+)', $route_key);
 			$regex_route = '/^'.str_replace('/', '\/', $regex_route).'$/';
 			if(preg_match($regex_route, $path, $path_components)) {
@@ -54,8 +54,7 @@ class Router {
 			$controller->process();
 		}
 		catch(Exception $e) {
-			echo "$path - Not Found(".$e->getMessage().") <hr />";
-			print_r($params);
+			die("$path - Not Found(".$e->getMessage().")");
 		}
 	}
 }

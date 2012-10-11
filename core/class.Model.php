@@ -1,8 +1,7 @@
 <?php
 
 abstract class Model {
-	public $fields = array();
-	public static $table;
+	private $_fields = array();
 	private static $_db;
 	
 	function __construct() {
@@ -11,16 +10,16 @@ abstract class Model {
 
 	function __get($name) {
 		if($name == "table_name") return self::table_name();
-		if(isset($this->fields[$name])) return $this->fields[$name];
+		if(isset($this->_fields[$name])) return $this->_fields[$name];
 		return false;
 	}
 
 	function __set($name, $value) {
-		$this->fields[$name] = $value;
+		$this->_fields[$name] = $value;
 	}
 
 	function __isset($name) {
-		return isset($this->fields[$name]);
+		return isset($this->_fields[$name]);
 	}
 
 	private static function db() {
@@ -82,9 +81,9 @@ abstract class Model {
 	}
 
 	protected function clean_attrs() {
-		return $this->fields;
+		return $this->_fields;
 		// $clean_attrs = array();
-		// foreach($this->fields as $key => $value) {
+		// foreach($this->_fields as $key => $value) {
 		// 	$clean_attrs[$key] = self::db()->prepare_value($value); #TODO: Review this.
 		// }
 		// return $clean_attrs;
