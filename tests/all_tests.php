@@ -6,6 +6,8 @@ require_once(GRIFFIN_ROOT.'/extlib/simpletest/autorun.php');
 
 $all_tests = new TestSuite('All Tests');
 $all_tests->add(new RouterTest());
+$all_tests->add(new ModelTest());
+$all_tests->add(new ControllerTest());
 
 $tr = new TextReporter();
 

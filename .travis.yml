@@ -4,6 +4,7 @@ php:
   - 5.4
 
 before_script:
- - mysql -e 'create database griffin'
+ - mysql -u root -e 'create database griffin'
+ - mysql -u root < tests/test_app/db/development_structure.sql
 
 script: php tests/all_tests.php
