@@ -9,7 +9,7 @@ Loader::register();
 
 if(getenv('TEST') == null) {
 	$router = new Router(GRIFFIN_WEBAPP.'/config/routes.php');
-	$router->route();
+	$router->route($_SERVER['REQUEST_URI']);
 }
 
 ?>

@@ -36,8 +36,8 @@ class Router {
 		return $params;
 	}
 	
-	public function route() {
-		$uri = explode('?', $_SERVER['REQUEST_URI']);
+	public function route($request_uri) {
+		$uri = explode('?', $request_uri);
 
 		$path = trim(mb_strtolower($uri[0]), '/');
 		$query_string = isset($uri[1]) ? $uri[1] : '';
