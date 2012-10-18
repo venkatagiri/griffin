@@ -24,7 +24,7 @@ abstract class Controller {
 
 	public function process($render_to_string = false) {
 		$action = $this->params['action'];
-		if(!method_exists($this, $action)) throw new Exception('404');
+		if(!method_exists($this, $action)) throw new Exception('Invalid action name!');
 		$this->$action(); // Execute the action.
 		if(!$this->_is_rendered) return $this->render($action, $render_to_string); // Render the action's view.
 	}
@@ -33,9 +33,9 @@ abstract class Controller {
 		return $this->render($args, true);
 	}
 
-	protected function render($args = false, $render_to_string = false) {
+	public function render($args = false, $render_to_string = false) {
 		if(is_string($args)) {
-			if(strpos($args, '/') === false) {
+			if(strpos($args, '/') === false && $args != '') {
 				// Rendering a view in the current Controller.
 				list($controller, $view) = array($this->params['controller'], $args);
 			} else if(substr_count($args, '/') === 1) {
@@ -55,17 +55,22 @@ abstract class Controller {
 	}
 
 	private function render_view($controller, $view, $render_to_string = false, $params = array()) {
-		if($this->_is_rendered) throw new Exception('Can only render once per action');
+		if($this->_is_rendered == true) throw new Exception('Can only render once per action!');
 
 		$view_file = GRIFFIN_WEBAPP.'/app/views/'.$controller.'/'.$view.'.php';
-		if(!file_exists($view_file)) throw new Exception('404');
+		if(!file_exists($view_file)) throw new Exception("View($controller/$view) Not Found!");
 
+		$result = false;
 		if($render_to_string) {
 			ob_start();
 			include($view_file);
-			return ob_get_clean();
-		} else require_once($view_file);
+			$result = ob_get_clean();
+		} else {
+			require_once($view_file);
+			$result = true;
+		}
 		$this->_is_rendered = true;
+		return $result;
 	}
 }
 
