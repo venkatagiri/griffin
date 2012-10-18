@@ -4,6 +4,7 @@ class RouterTest extends UnitTestCase {
 	public function setUp() {
 		Router::reset();
 	}
+
 	public function testRouter() {
 		Router::connect('recipes/:ingredient', array('controller' => 'recipes', 'action' => 'show'));
 
@@ -47,6 +48,18 @@ class RouterTest extends UnitTestCase {
 		$params = $router->parse('admin');
 		$this->assertEqual('dashboard', $params['controller']);
 		$this->assertEqual('index', $params['action']);
+	}
+
+	public function testQueryString() {
+		Router::connect(':controller/:action/:id');
+		Router::connect(':controller/:action');
+
+		$router = new Router();
+		$params = $router->parse('recipes/list', 'page=1&category=cooking');
+		$this->assertEqual('recipes', $params['controller']);
+		$this->assertEqual('list', $params['action']);
+		$this->assertEqual('1', $params['page']);
+		$this->assertEqual('cooking', $params['category']);
 	}
 }
 

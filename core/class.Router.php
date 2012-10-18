@@ -15,7 +15,7 @@ class Router {
 		self::$_routes = array();
 	}
 
-	public function parse($path) {
+	public function parse($path, $query_string = '') {
 		$params = array();
 		foreach(self::$_routes as $route_key => $route_params) {
 			$regex_route = preg_replace('/:(\w+)/', '(\w+)', $route_key);
@@ -26,6 +26,12 @@ class Router {
 				$place_holders = $place_holders[1];
 				foreach ($place_holders as $index => $value) $params[$value] = $path_components[$index];
 				foreach ($route_params as $index => $value) $params[$index] = $value;
+				if($query_string != '') {
+					foreach(explode('&', $query_string) as $url_params) {
+						list($index, $value) = explode('=', $url_params);
+						$params[$index] = $value;
+					}
+				}
 				break;
 			}
 		}
@@ -42,7 +48,7 @@ class Router {
 		$path = trim(mb_strtolower($uri[0]), '/');
 		$query_string = isset($uri[1]) ? $uri[1] : '';
 
-		$params = $this->parse($path);
+		$params = $this->parse($path, $query_string);
 
 		$controller_parts = explode('_', $params['controller']);
 		foreach ($controller_parts as $key => $value) {
