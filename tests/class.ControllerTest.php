@@ -14,13 +14,15 @@ class ControllerTest extends UnitTestCase {
 	public function testProcess() {
 		$params = array(
 			'controller' => 'products',
-			'action' => 'index',
-			'result' => '56'
+			'action' => 'extract',
+			'int_param' => '56',
+			'array_param' => array('zero', 'one', 'two')
 		);
+
 		$controller = new ProductsController($params);
 		$output = $controller->process(true);
 
-		$this->assertEqual('56', $output);
+		$this->assertEqual('56\nzero:one:two', $output);
 	}
 
 	public function testProcess_InvalidActionName() {

@@ -29,32 +29,58 @@ abstract class Controller {
 		if(!$this->_is_rendered) return $this->render($action, $render_to_string); // Render the action's view.
 	}
 
-	public function render_to_string($args = false) {
-		return $this->render($args, true);
+	public function render_to_string($options = false) {
+		return $this->render($options, true);
 	}
 
-	public function render($args = false, $render_to_string = false) {
-		if(is_string($args)) {
-			if(strpos($args, '/') === false && $args != '') {
+	public function render($options = false, $render_to_string = false) {
+		if(is_string($options)) {
+			if(strpos($options, '/') === false && $options != '') {
 				// Rendering a view in the current Controller.
-				list($controller, $view) = array($this->params['controller'], $args);
-			} else if(substr_count($args, '/') === 1) {
+				list($controller, $view) = array($this->params['controller'], $options);
+			} else if(substr_count($options, '/') === 1) {
 				// Rendering a view from another Controller.
-				list($controller, $view) = explode('/', $args);
+				list($controller, $view) = explode('/', $options);
 			} else {
 				throw new Exception('Render - Invalid Arguments!');
 			}
-		} else if(is_array($args)) {
+		} else if(is_array($options)) {
 			// Render by parsing the array of options.
-			$controller = isset($args['controller']) ? $args['controller'] : $this->params['controller'];
-			$view = isset($args['action']) ? $args['action'] : $this->params['action'];
+			$controller = isset($options['controller']) ? $options['controller'] : $this->params['controller'];
+			$view = isset($options['action']) ? $options['action'] : $this->params['action'];
 		} else {
 			throw new Exception('Render - Invalid Arguments!');
 		}
-		return $this->render_view($controller, $view, $render_to_string);
+		return $this->_render_view($controller, $view, $render_to_string);
 	}
 
-	private function render_view($controller, $view, $render_to_string = false, $params = array()) {
+	public function redirect_to($options = false) {
+		$location = '';
+		if(is_string($options)) {
+			$location = $options;
+		} else if(is_array($options)) {
+			$location = $this->url_for($options);
+		} else {
+			throw new Exception('Redirect - Invalid Arguments!');
+		}
+		$this->_redirect_to($location);
+	}
+
+	public function url_for($options = []) {
+		if(!isset($options['controller'])) $options['controller'] = $this->params['controller'];
+		if(!isset($options['action'])) $options['action'] = 'index';
+
+		$url = $options['controller'].'/'.$options['action'];
+		if(isset($options['id'])) $url .= '/'.$options['id'];
+		return $url;
+	}
+
+	private function _redirect_to($location) {
+		header("Location: {$location}");
+		exit;
+	}
+
+	private function _render_view($controller, $view, $render_to_string = false, $params = array()) {
 		if($this->_is_rendered == true) throw new Exception('Can only render once per action!');
 
 		$view_file = GRIFFIN_WEBAPP.'/app/views/'.$controller.'/'.$view.'.php';
@@ -63,10 +89,12 @@ abstract class Controller {
 		$result = false;
 		if($render_to_string) {
 			ob_start();
+			extract($this->_data);
 			include($view_file);
 			$result = ob_get_clean();
 		} else {
-			require_once($view_file);
+			extract($this->_data);
+			include($view_file);
 			$result = true;
 		}
 		$this->_is_rendered = true;

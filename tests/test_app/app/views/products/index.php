@@ -1,5 +1,1 @@
-<?php
-
-echo $this->result;
-
-?>
+The Index Page!
